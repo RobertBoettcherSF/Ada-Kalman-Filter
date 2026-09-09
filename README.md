@@ -14,12 +14,12 @@ measurement with the optimal Kalman gain).
 
 | Concern | Approach | Notes |
 | --- | --- | --- |
-| **Predict** | \(\hat x_{k\mid k-1}=F\hat x+Bu\), \(P_{k\mid k-1}=FPF^\mathsf{T}+Q\) | Wikipedia discrete KF |
-| **Update** | innovation \(\tilde y=z-H\hat x\), gain \(K=PH^\mathsf{T}S^{-1}\) | \(S=HPH^\mathsf{T}+R\) |
-| **Joseph form** | \(P\leftarrow(I-KH)P(I-KH)^\mathsf{T}+KRK^\mathsf{T}\) | Prefer numerically |
+| **Predict** | $\hat x_{k\mid k-1}=F\hat x+Bu$, $P_{k\mid k-1}=FPF^\mathsf{T}+Q$ | Wikipedia discrete KF |
+| **Update** | innovation $\tilde y=z-H\hat x$, gain $K=PH^\mathsf{T}S^{-1}$ | $S=HPH^\mathsf{T}+R$ |
+| **Joseph form** | $P\leftarrow(I-KH)P(I-KH)^\mathsf{T}+KRK^\mathsf{T}$ | Prefer numerically |
 | **Scalar KF** | 1-D state & measurement | Clearest educational core |
 | **Vector KF** | Dense matrices, `Max_Dim = 4` | Small fixed dimension |
-| **Solve** | Gaussian elimination + partial pivot | For \(S^{-1}\) / gain |
+| **Solve** | Gaussian elimination + partial pivot | For $S^{-1}$ / gain |
 
 Language: **Ada 2023** (ISO/IEC 8652:2023), compiled with GNAT (`-gnat2022`).
 
@@ -43,7 +43,7 @@ Named exceptions: `Invalid_Argument`, `Degenerate_Geometry`,
 
 **Predict**
 
-\[
+$$
 \hat{\mathbf{x}}_{k\mid k-1}
 =
 \mathbf{F}_k\hat{\mathbf{x}}_{k-1\mid k-1}+\mathbf{B}_k\mathbf{u}_k,
@@ -51,11 +51,11 @@ Named exceptions: `Invalid_Argument`, `Degenerate_Geometry`,
 \mathbf{P}_{k\mid k-1}
 =
 \mathbf{F}_k\mathbf{P}_{k-1\mid k-1}\mathbf{F}_k^\mathsf{T}+\mathbf{Q}_k.
-\]
+$$
 
 **Update**
 
-\[
+$$
 \begin{aligned}
 \tilde{\mathbf{y}}_k
 &=
@@ -77,19 +77,19 @@ Named exceptions: `Invalid_Argument`, `Degenerate_Geometry`,
 \mathbf{K}_k\mathbf{R}_k\mathbf{K}_k^\mathsf{T}
 \quad\text{(Joseph form)}.
 \end{aligned}
-\]
+$$
 
 ### Scalar vs vector
 
-- **Scalar** (`Scalar_*`): educational special case with state \(x\in\mathbb{R}\)
-  and variance \(P\ge 0\). Joseph update reduces to
-  \(P\leftarrow(1-KH)^2 P + K^2 R\).
+- **Scalar** (`Scalar_*`): educational special case with state $x\in\mathbb{R}$
+  and variance $P\ge 0$. Joseph update reduces to
+  $P\leftarrow(1-KH)^2 P + K^2 R$.
 - **Vector** (`Predict` / `Update` / `Filter_Step`): dense `Max_Dim = 4`
-  matrices; `Model` holds \(F,H,Q,R\) and optional control \(B\).
+  matrices; `Model` holds $F,H,Q,R$ and optional control $B$.
 
 ### Joseph form
 
-The “usual” update \(P\leftarrow(I-KH)P\) can lose symmetry / positivity to
+The “usual” update $P\leftarrow(I-KH)P$ can lose symmetry / positivity to
 round-off. The **Joseph form** used here is algebraically equivalent for the
 optimal gain and is preferred in practice for numerical stability.
 
@@ -143,13 +143,13 @@ make test
 ```
 
 Runs `bin/tests` (standalone main). The suite covers scalar predict/update
-hand checks, Joseph non-negativity, convergence under noise, \(R\to 0\),
+hand checks, Joseph non-negativity, convergence under noise, $R\to 0$,
 static variance decrease, singular edges, 2-D models, and multi-step RMSE
 versus raw measurements. Ends with `pragma Assert (Fail_Count = 0)`.
 
 ## Related (notes only — not implemented)
 
-- **Extended Kalman filter (EKF):** linearize nonlinear \(f,h\) with Jacobians
+- **Extended Kalman filter (EKF):** linearize nonlinear $f,h$ with Jacobians
   at the current estimate; same predict/update structure on the tangent model.
 - **Unscented Kalman filter (UKF):** propagate sigma points through nonlinear
   maps; avoid explicit Jacobians.
